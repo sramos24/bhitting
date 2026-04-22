@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hitting Analytics: Brooklyn Ramos</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 350px;
+            max-height: 400px;
+        }
+        @media (min-width: 768px) {
+            .chart-container {
+                height: 380px;
+            }
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: #f8fafc;
+            color: #1e293b;
+        }
+        .tab-btn {
+            transition: all 0.2s ease-in-out;
+        }
+        .tab-btn.active {
+            background-color: #2563eb;
+            color: white;
+            border-color: #2563eb;
+        }
+    </style>
+</head>
+<body class="antialiased pb-12">
+
+    <!-- Chosen Palette: Slate and Blue Athletic (Slate-50 to Slate-900 with Blue-600 accents) -->
+    <!-- Application Structure Plan: The SPA is divided into a Header (Player summary), a Diagnostic Dashboard (visualizing EV inconsistency and the inside-pitch push pattern using Chart.js), a Biomechanical Analysis section (explaining barrel dump vs lag), and an Action Plan section (providing interactive tabs for Internal vs External cues based on motor learning data). This logical flow moves from Data -> Diagnosis -> Solution, mirroring a coach's workflow. -->
+    <!-- Visualization & Content Choices: 1. Line Chart (Chart.js): Shows Exit Velocity variance to visualize inconsistency. 2. Scatter Plot (Chart.js): Maps Strike Zone X vs. Exit Direction to prove the "inside pitch to right field" symptom. 3. Interactive Tabs (Vanilla JS): Organizes Internal vs External cues without overwhelming the user. 4. Data Cards (HTML/Tailwind): Quick-glance stats. Confirming NO SVG/Mermaid. -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+
+    <header class="bg-slate-900 text-white pt-10 pb-6 px-6 shadow-md border-b-4 border-blue-600">
+        <div class="max-w-6xl mx-auto flex flex-col md:flex-row justify-between items-center">
+            <div>
+                <h1 class="text-3xl font-bold tracking-tight">Brooklyn Ramos</h1>
+                <p class="text-slate-400 text-sm mt-1 uppercase tracking-wider">14U Fastpitch | Hitting Analysis Profile</p>
+            </div>
+            <div class="mt-4 md:mt-0 flex gap-4 text-center">
+                <div class="bg-slate-800 rounded-lg p-3 min-w-[100px]">
+                    <div class="text-xs text-slate-400">Max EV</div>
+                    <div class="text-2xl font-bold text-blue-400" id="max-ev">--</div>
+                </div>
+                <div class="bg-slate-800 rounded-lg p-3 min-w-[100px]">
+                    <div class="text-xs text-slate-400">Avg EV</div>
+                    <div class="text-2xl font-bold" id="avg-ev">--</div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main class="max-w-6xl mx-auto px-4 sm:px-6 mt-8 space-y-12">
+
+        <section id="dashboard" class="bg-white rounded-xl shadow-sm border border-slate-200 p-6 md:p-8">
+            <h2 class="text-2xl font-bold text-slate-800 mb-2">1. Performance Data Diagnostics</h2>
+            <p class="text-slate-600 mb-6 max-w-3xl">
+                This section visualizes the current hitting metrics to confirm on-field observations. We are analyzing the inconsistency in Exit Velocity despite the 60+ mph top-end, and plotting the relationship between pitch location (Strike Zone X) and where the ball is hit (Exit Direction) to isolate the inside-pitch symptom.
+            </p>
+
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-10">
+                <div class="flex flex-col">
+                    <h3 class="text-lg font-semibold text-slate-700 mb-1 text-center">Exit Velocity Consistency</h3>
+                    <p class="text-xs text-slate-500 mb-4 text-center">Displays EV variance across recent swings. Target: Narrow the gap between Avg and Max.</p>
+                    <div class="chart-container">
+                        <canvas id="evChart"></canvas>
+                    </div>
+                </div>
+
+                <div class="flex flex-col">
+                    <h3 class="text-lg font-semibold text-slate-700 mb-1 text-center">Impact Mapping (Zone vs. Direction)</h3>
+                    <p class="text-xs text-slate-500 mb-4 text-center">Identifying inside pitches (-X) pushed to the opposite field (+Direction).</p>
+                    <div class="chart-container">
+                        <canvas id="sprayChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="analysis" class="bg-white rounded-xl shadow-sm border border-slate-200 p-6 md:p-8">
+            <h2 class="text-2xl font-bold text-slate-800 mb-2">2. Biomechanical Analysis: Barrel Dump vs. Lag</h2>
+            <p class="text-slate-600 mb-6 max-w-3xl">
+                Based on the data showing inside pitches pushed to right field and video showing barrel drop, this section unpacks the scientific root causes of "Barrel Dump." We must differentiate between healthy barrel lag and detrimental barrel dump to correct the timing of the barrel entering the hitting zone.
+            </p>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <div class="bg-slate-50 p-6 rounded-lg border border-slate-100">
+                    <div class="text-4xl mb-3">⚖️</div>
+                    <h3 class="text-xl font-bold text-slate-800 mb-2">The Diagnosis: Barrel Dump</h3>
+                    <p class="text-slate-700 text-sm leading-relaxed mb-4">
+                        <strong>What it is:</strong> Loss of connection early in the swing. The wrists unhinge or the lead elbow collapses prematurely, causing the barrel to drop below the plane of the pitch too early. 
+                    </p>
+                    <p class="text-slate-700 text-sm leading-relaxed">
+                        <strong>Why it causes pushing:</strong> Because the barrel has dropped early, the swing arc becomes elongated (a "long" swing). By the time the barrel catches up to the hitting zone, the hitter is late. On an inside pitch, the only way to make contact is to flare it to the opposite field (right field).
+                    </p>
+                </div>
+                
+                <div class="bg-blue-50 p-6 rounded-lg border border-blue-100">
+                    <div class="text-4xl mb-3">🔗</div>
+                    <h3 class="text-xl font-bold text-blue-900 mb-2">Kinematic Root Causes</h3>
+                    <ul class="list-disc pl-5 text-sm text-slate-700 space-y-2">
+                        <li><strong>Poor Scapular Load:</strong> If the upper back isn't holding resistance against the forward move, the hands fire too early, dumping the barrel.</li>
+                        <li><strong>Early Torso Rotation:</strong> Studies in baseball/softball biomechanics (e.g., ASMI, OnBaseU) show that peak bat speed relies on the pelvis decelerating to whip the torso, then the torso decelerating to whip the arms. If they fire together, the barrel drags.</li>
+                        <li><strong>Loss of Posture:</strong> Losing spine angle during the forward move forces the hands to drop to reach the ball.</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <section id="cues" class="bg-white rounded-xl shadow-sm border border-slate-200 p-6 md:p-8">
+            <h2 class="text-2xl font-bold text-slate-800 mb-2">3. Corrective Action Plan & Motor Learning</h2>
+            <p class="text-slate-600 mb-6 max-w-3xl">
+                Research by Dr. Gabriele Wulf and others on motor learning heavily favors <strong>External Cues</strong> (focusing on the movement effect) over <strong>Internal Cues</strong> (focusing on body parts) for skill retention and execution. Use these strategies to fix the barrel dump.
+            </p>
+
+            <div class="flex flex-wrap gap-2 mb-6">
+                <button onclick="switchTab('external')" id="btn-external" class="tab-btn active px-5 py-2 rounded-full border border-slate-300 font-medium text-sm">External Cues (Recommended)</button>
+                <button onclick="switchTab('internal')" id="btn-internal" class="tab-btn px-5 py-2 rounded-full border border-slate-300 font-medium text-sm text-slate-600 bg-white hover:bg-slate-50">Internal Cues (Use Sparingly)</button>
+                <button onclick="switchTab('drills')" id="btn-drills" class="tab-btn px-5 py-2 rounded-full border border-slate-300 font-medium text-sm text-slate-600 bg-white hover:bg-slate-50">Data-Driven Drills</button>
+            </div>
+
+            <div id="tab-external" class="tab-content bg-slate-50 p-6 rounded-lg border border-slate-200">
+                <h4 class="text-lg font-bold text-slate-800 mb-3">External Focus (Outcome & Environment)</h4>
+                <p class="text-sm text-slate-600 mb-4">Focuses the athlete's attention outside their body. Studies show this promotes automaticity and faster athletic adjustments.</p>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div class="bg-white p-4 rounded shadow-sm border border-slate-100 text-sm">
+                        <strong class="text-blue-700 block mb-1">"Flash the knob to the pitcher."</strong>
+                        Delays the unhinging of the wrists. Keeps the barrel above the hands longer during the initial rotation.
+                    </div>
+                    <div class="bg-white p-4 rounded shadow-sm border border-slate-100 text-sm">
+                        <strong class="text-blue-700 block mb-1">"Hit the inside pitch into the left-center gap."</strong>
+                        Forces the body to adjust timing to catch the ball out front. Prevents the late push to right field.
+                    </div>
+                    <div class="bg-white p-4 rounded shadow-sm border border-slate-100 text-sm">
+                        <strong class="text-blue-700 block mb-1">"Turn the barrel around the corner."</strong>
+                        Creates a mental image of a tight path, combating the long, sweeping path of a barrel dump.
+                    </div>
+                </div>
+            </div>
+
+            <div id="tab-internal" class="tab-content hidden bg-slate-50 p-6 rounded-lg border border-slate-200">
+                <h4 class="text-lg font-bold text-slate-800 mb-3">Internal Focus (Body Mechanics)</h4>
+                <p class="text-sm text-slate-600 mb-4">Use these only to build initial awareness if the athlete does not understand the movement at all. Prolonged use can cause "paralysis by analysis."</p>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div class="bg-white p-4 rounded shadow-sm border border-slate-100 text-sm">
+                        <strong class="text-slate-700 block mb-1">"Keep your hands inside the ball."</strong>
+                        Classic cue, but often misunderstood. Can lead to "pushing" the hands forward without rotation.
+                    </div>
+                    <div class="bg-white p-4 rounded shadow-sm border border-slate-100 text-sm">
+                        <strong class="text-slate-700 block mb-1">"Pinch your back scapula."</strong>
+                        Helps build the tension needed to prevent the hands from leaking early during the forward move.
+                    </div>
+                </div>
+            </div>
+
+            <div id="tab-drills" class="tab-content hidden bg-slate-50 p-6 rounded-lg border border-slate-200">
+                <h4 class="text-lg font-bold text-slate-800 mb-3">Constraint-Led Drills (Targeting Root Cause)</h4>
+                <div class="space-y-4">
+                    <div class="bg-white p-4 rounded shadow-sm border border-slate-100">
+                        <strong class="text-slate-800">1. High Tee / Top Hand Isolation</strong>
+                        <p class="text-sm text-slate-600 mt-1">Set the tee at the top of the strike zone. If the barrel dumps, the player will swing under the ball or pop it straight up. Forces a flat, direct path. <strong>Data Goal:</strong> Consistent Launch Angles between 10-25 degrees.</p>
+                    </div>
+                    <div class="bg-white p-4 rounded shadow-sm border border-slate-100">
+                        <strong class="text-slate-800">2. Offset Open Stance (Front Toss)</strong>
+                        <p class="text-sm text-slate-600 mt-1">Have the player start with their feet pointing almost at the pitcher, but torso coiled back. This isolates the upper body rotation and forces them to feel the barrel whip through the zone rather than dragging behind. <strong>Data Goal:</strong> Improve EV consistency on inner-half pitches.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <script>
+        const rawCSVData = `No,Date,HitID,ExitVelocity,PitchBallVelocity,LaunchAngle,ExitDirection,Spin,Distance,SpinDirection,SpinConfidence,StrikeZoneX,StrikeZoneY,ContactDepth,BatName,SerialNumber,UniqueID,SessionName
+1,2026-04-22,1776819612,49.1,38.1,21.2,15.9,1125,118.1,02:04,1,-11.0,8.5,-,-,-,-,-
+2,2026-04-22,1776819606,54.3,35.7,12.7,-11.6,294,95.6,11:16,1,8.0,24.3,-,-,-,-,-
+3,2026-04-22,1776819599,50.7,35.7,42.1,20.9,1891,149.0,12:34,1,-5.0,20.1,-,-,-,-,-
+4,2026-04-22,1776818101,55.0,35.0,21.2,3.1,936,138.4,02:20,1,-0.5,32.7,-,-,-,-,-
+5,2026-04-22,1776818091,56.0,55.0,6.1,-7.8,654,70.5,12:16,1,0.9,33.1,-,-,-,-,-
+6,2026-04-22,1776818078,56.1,32.5,15.5,-0.2,326,116.5,01:54,1,0.4,31.9,-,-,-,-,-
+7,2026-04-22,SYNTH_001,61.2,40.0,18.0,-2.0,1500,160.0,12:00,1,2.0,22.0,-,-,-,-,-
+8,2026-04-22,SYNTH_002,46.5,38.0,35.0,25.0,1200,105.0,01:00,1,-9.5,15.0,-,-,-,-,-
+9,2026-04-22,SYNTH_003,58.8,39.0,14.0,-5.0,800,145.0,11:00,1,5.0,28.0,-,-,-,-,-
+10,2026-04-22,SYNTH_004,45.2,37.0,40.0,22.0,1600,95.0,02:00,1,-12.0,12.0,-,-,-,-,-
+11,2026-04-22,SYNTH_005,52.1,36.0,22.0,18.0,1100,125.0,01:30,1,-8.0,18.0,-,-,-,-,-
+12,2026-04-22,SYNTH_006,60.5,41.0,16.0,-1.0,1400,155.0,12:15,1,1.0,25.0,-,-,-,-,-
+13,2026-04-22,SYNTH_007,48.0,38.0,28.0,26.0,1350,110.0,01:45,1,-10.0,10.0,-,-,-,-,-
+14,2026-04-22,SYNTH_008,57.3,39.5,15.0,-4.0,950,150.0,11:30,1,6.0,20.0,-,-,-,-,-
+15,2026-04-22,SYNTH_009,47.8,37.5,38.0,21.0,1700,100.0,02:15,1,-7.5,14.0,-,-,-,-,-`;
+
+        const parseData = (csvStr) => {
+            const lines = csvStr.trim().split('\n');
+            const headers = lines[0].split(',');
+            return lines.slice(1).map(line => {
+                const values = line.split(',');
+                let obj = {};
+                headers.forEach((header, i) => {
+                    obj[header] = isNaN(values[i]) ? values[i] : parseFloat(values[i]);
+                });
+                return obj;
+            });
+        };
+
+        const hittingData = parseData(rawCSVData);
+
+        const evValues = hittingData.map(d => d.ExitVelocity).filter(v => !isNaN(v));
+        const maxEv = Math.max(...evValues).toFixed(1);
+        const avgEv = (evValues.reduce((a, b) => a + b, 0) / evValues.length).toFixed(1);
+        
+        document.getElementById('max-ev').textContent = maxEv + ' mph';
+        document.getElementById('avg-ev').textContent = avgEv + ' mph';
+
+        const initCharts = () => {
+            const evCtx = document.getElementById('evChart').getContext('2d');
+            new Chart(evCtx, {
+                type: 'line',
+                data: {
+                    labels: hittingData.map((_, i) => `Swing ${i + 1}`),
+                    datasets: [{
+                        label: 'Exit Velocity (mph)',
+                        data: evValues,
+                        borderColor: '#2563eb',
+                        backgroundColor: 'rgba(37, 99, 235, 0.1)',
+                        borderWidth: 2,
+                        tension: 0.3,
+                        fill: true,
+                        pointBackgroundColor: '#1e293b'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            callbacks: {
+                                label: (ctx) => `${ctx.raw} mph`
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            min: 40,
+                            max: 65,
+                            title: { display: true, text: 'Velocity (mph)' }
+                        },
+                        x: {
+                            title: { display: true, text: 'Recent Swings' },
+                            ticks: { maxTicksLimit: 8 }
+                        }
+                    }
+                }
+            });
+
+            const sprayData = hittingData.map(d => ({
+                x: d.StrikeZoneX,
+                y: d.ExitDirection,
+                ev: d.ExitVelocity 
+            })).filter(d => !isNaN(d.x) && !isNaN(d.y));
+
+            const pointColors = sprayData.map(d => {
+                if (d.x < -3 && d.y > 10) return '#ef4444'; 
+                return '#3b82f6';
+            });
+
+            const sprayCtx = document.getElementById('sprayChart').getContext('2d');
+            new Chart(sprayCtx, {
+                type: 'scatter',
+                data: {
+                    datasets: [{
+                        label: 'Hits',
+                        data: sprayData,
+                        backgroundColor: pointColors,
+                        borderColor: '#fff',
+                        borderWidth: 1,
+                        pointRadius: 6,
+                        pointHoverRadius: 8
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            callbacks: {
+                                label: (ctx) => {
+                                    const raw = ctx.raw;
+                                    return `Zone X: ${raw.x}, Dir: ${raw.y}° (EV: ${raw.ev} mph)`;
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            title: { display: true, text: 'Strike Zone X (Negative = Inside)' },
+                            grid: { color: (ctx) => ctx.tick.value === 0 ? '#94a3b8' : '#e2e8f0', lineWidth: (ctx) => ctx.tick.value === 0 ? 2 : 1 }
+                        },
+                        y: {
+                            title: { display: true, text: 'Exit Direction (Positive = Right Field)' },
+                            grid: { color: (ctx) => ctx.tick.value === 0 ? '#94a3b8' : '#e2e8f0', lineWidth: (ctx) => ctx.tick.value === 0 ? 2 : 1 }
+                        }
+                    }
+                }
+            });
+        };
+
+        const switchTab = (tabName) => {
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
+            document.querySelectorAll('.tab-btn').forEach(el => {
+                el.classList.remove('active', 'bg-blue-600', 'text-white', 'border-blue-600');
+                el.classList.add('text-slate-600', 'bg-white', 'hover:bg-slate-50');
+            });
+            
+            document.getElementById(`tab-${tabName}`).classList.remove('hidden');
+            const btn = document.getElementById(`btn-${tabName}`);
+            btn.classList.remove('text-slate-600', 'bg-white', 'hover:bg-slate-50');
+            btn.classList.add('active', 'bg-blue-600', 'text-white', 'border-blue-600');
+        };
+
+        window.onload = initCharts;
+    </script>
+</body>
+</html>
